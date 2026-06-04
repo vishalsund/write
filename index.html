@@ -9,14 +9,19 @@
   <body>
     <div id="app" class="app">
       <header class="top-bar">
-        <input
-          type="text"
-          id="doc-title"
-          class="doc-title"
-          value="Untitled"
-          spellcheck="false"
-          aria-label="Document name"
-        />
+        <div class="top-bar-start">
+          <a href="./" class="brand" aria-label="write">
+            <span class="brand-mark">write<span class="brand-underscore">_</span></span>
+          </a>
+          <input
+            type="text"
+            id="doc-title"
+            class="doc-title"
+            value="Untitled"
+            spellcheck="false"
+            aria-label="Document name"
+          />
+        </div>
         <div class="top-actions">
           <button type="button" id="btn-open" class="btn-ghost">Open</button>
           <button type="button" id="btn-save" class="btn-ghost">Save</button>
