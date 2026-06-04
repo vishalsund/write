@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Write</title>
+  </head>
+  <body>
+    <div id="app" class="app">
+      <header class="top-bar">
+        <input
+          type="text"
+          id="doc-title"
+          class="doc-title"
+          value="Untitled"
+          spellcheck="false"
+          aria-label="Document name"
+        />
+        <div class="top-actions">
+          <button type="button" id="btn-open" class="btn-ghost">Open</button>
+          <button type="button" id="btn-save" class="btn-ghost">Save</button>
+          <div class="menu-wrap export-wrap">
+            <button type="button" id="btn-export" class="btn-ghost" aria-haspopup="true">
+              Export
+            </button>
+            <div id="export-menu" class="dropdown-menu" hidden>
+              <button type="button" data-export="md">Markdown (.md)</button>
+              <button type="button" data-export="txt">Plain text (.txt)</button>
+            </div>
+          </div>
+          <button
+            type="button"
+            id="btn-help"
+            class="btn-icon"
+            title="Keyboard shortcuts"
+            aria-label="Keyboard shortcuts"
+          >
+            <span id="btn-help-icon" class="icon-slot"></span>
+          </button>
+          <button
+            type="button"
+            id="theme-toggle"
+            class="btn-icon"
+            aria-label="Toggle theme"
+            title="Toggle theme"
+          >
+            <span id="theme-icon-slot" class="icon-slot"></span>
+          </button>
+        </div>
+      </header>
+
+      <main class="editor-wrap">
+        <div id="editor" class="editor"></div>
+      </main>
+
+      <footer class="bottom-bar">
+        <div class="toolbar-scroll">
+          <div class="toolbar" role="toolbar" aria-label="Formatting">
+            <div class="select-wrap select-wrap--heading">
+              <label class="select-label" for="heading-select">Style</label>
+              <select id="heading-select" class="toolbar-select" aria-label="Block style">
+                <option value="0">Paragraph</option>
+                <option value="1">Heading 1</option>
+                <option value="2">Heading 2</option>
+                <option value="3">Heading 3</option>
+                <option value="4">Heading 4</option>
+                <option value="5">Heading 5</option>
+                <option value="6">Heading 6</option>
+              </select>
+            </div>
+            <span class="toolbar-divider"></span>
+            <button type="button" data-cmd="bold" class="btn-tool" data-label="Bold" title="Bold">
+              <span class="btn-tool-letter">B</span>
+            </button>
+            <button type="button" data-cmd="italic" class="btn-tool" data-label="Italic" title="Italic">
+              <span class="btn-tool-letter italic">I</span>
+            </button>
+            <button type="button" data-cmd="link" class="btn-tool" data-label="Link" title="Link">
+              <span class="icon-slot" data-icon="link"></span>
+            </button>
+            <button type="button" data-cmd="code" class="btn-tool" data-label="Inline code" title="Inline code">
+              <span class="icon-slot" data-icon="code"></span>
+            </button>
+            <button type="button" data-cmd="codeBlock" class="btn-tool" data-label="Code block" title="Code block">
+              <span class="icon-slot" data-icon="codeBlock"></span>
+            </button>
+            <button type="button" data-cmd="math" class="btn-tool" data-label="Math" title="Math">
+              <span class="icon-slot" data-icon="math"></span>
+            </button>
+            <span class="toolbar-divider"></span>
+            <button
+              type="button"
+              data-cmd="bulletList"
+              class="btn-tool"
+              data-label="Bullet list"
+              title="Bullet list"
+            >
+              <span class="icon-slot" data-icon="bulletList"></span>
+            </button>
+            <button
+              type="button"
+              data-cmd="orderedList"
+              class="btn-tool"
+              data-label="Numbered list"
+              title="Numbered list"
+            >
+              <span class="icon-slot" data-icon="orderedList"></span>
+            </button>
+            <span class="toolbar-divider"></span>
+            <button
+              type="button"
+              id="btn-image"
+              class="btn-tool"
+              data-label="Insert image"
+              title="Insert image"
+            >
+              <span class="icon-slot" data-icon="image"></span>
+            </button>
+            <span class="toolbar-divider"></span>
+            <button type="button" data-cmd="undo" class="btn-tool" data-label="Undo" title="Undo">
+              <span class="icon-slot" data-icon="undo"></span>
+            </button>
+            <button type="button" data-cmd="redo" class="btn-tool" data-label="Redo" title="Redo">
+              <span class="icon-slot" data-icon="redo"></span>
+            </button>
+          </div>
+        </div>
+
+        <div class="counts" aria-live="polite">
+          <span id="selection-count" class="count-selection" hidden></span>
+          <span id="document-count" class="count-document"></span>
+        </div>
+
+        <div class="font-settings">
+          <div class="select-wrap select-wrap--compact">
+            <label class="select-label" for="font-family">Font</label>
+            <select id="font-family" class="toolbar-select compact" aria-label="Editor font">
+              <option value="sans">Sans</option>
+              <option value="serif">Serif</option>
+              <option value="mono">Mono</option>
+            </select>
+          </div>
+          <div class="select-wrap select-wrap--compact">
+            <label class="select-label" for="font-size">Size</label>
+            <select id="font-size" class="toolbar-select compact" aria-label="Font size">
+              <option value="15">15</option>
+              <option value="17" selected>17</option>
+              <option value="19">19</option>
+              <option value="21">21</option>
+              <option value="24">24</option>
+            </select>
+          </div>
+        </div>
+      </footer>
+
+      <input type="file" id="file-input" accept=".md,.txt,.markdown,text/plain,text/markdown" hidden />
+      <input type="file" id="image-input" accept="image/*" multiple hidden />
+    </div>
+
+    <div id="help-backdrop" class="modal-backdrop" hidden>
+      <div
+        id="help-dialog"
+        class="modal help-modal"
+        role="dialog"
+        aria-labelledby="help-title"
+        hidden
+      >
+        <header class="modal-header">
+          <h2 id="help-title">Keyboard shortcuts</h2>
+          <button type="button" id="help-close" class="btn-icon modal-close" aria-label="Close">
+            <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </header>
+        <p class="modal-hint">Click Change, then press the new shortcut. Press Esc to cancel.</p>
+        <div id="help-list" class="help-list"></div>
+        <footer class="modal-footer">
+          <button type="button" id="help-reset" class="btn-ghost">Reset to defaults</button>
+        </footer>
+      </div>
+    </div>
+
+    <div id="math-backdrop" class="modal-backdrop" hidden>
+      <div id="math-dialog" class="modal math-modal" role="dialog" aria-labelledby="math-title" hidden>
+        <header class="modal-header">
+          <h2 id="math-title">Math expression</h2>
+        </header>
+        <div class="math-mode-row">
+          <label class="math-mode-option">
+            <input type="radio" name="math-mode" id="math-mode-inline" value="inline" checked />
+            <span>Inline</span>
+          </label>
+          <label class="math-mode-option">
+            <input type="radio" name="math-mode" id="math-mode-block" value="block" />
+            <span>Block</span>
+          </label>
+        </div>
+        <label class="field">
+          <span>LaTeX</span>
+          <textarea
+            id="math-latex"
+            rows="3"
+            placeholder="E = mc^2  or  \sum_{i=1}^{n} x_i"
+            spellcheck="false"
+            autocomplete="off"
+          ></textarea>
+        </label>
+        <div id="math-preview" class="math-preview" aria-live="polite"></div>
+        <p class="modal-hint math-hint">
+          Type <code>$…$</code> for inline or <code>$$…$$</code> for block math while writing. Click a formula to edit.
+        </p>
+        <footer class="modal-footer link-footer">
+          <button type="button" id="math-delete" class="btn-ghost danger" hidden>Remove</button>
+          <div class="link-actions">
+            <button type="button" id="math-cancel" class="btn-ghost">Cancel</button>
+            <button type="button" id="math-apply" class="btn-primary">Insert</button>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <div id="link-backdrop" class="modal-backdrop" hidden>
+      <div id="link-dialog" class="modal link-modal" role="dialog" aria-labelledby="link-title" hidden>
+        <header class="modal-header">
+          <h2 id="link-title">Insert link</h2>
+        </header>
+        <label class="field">
+          <span>URL</span>
+          <input type="url" id="link-url" placeholder="https://example.com" autocomplete="off" />
+        </label>
+        <label class="field">
+          <span>Display text</span>
+          <input type="text" id="link-text" placeholder="Optional label" autocomplete="off" />
+        </label>
+        <footer class="modal-footer link-footer">
+          <button type="button" id="link-remove" class="btn-ghost danger" hidden>Remove link</button>
+          <div class="link-actions">
+            <button type="button" id="link-cancel" class="btn-ghost">Cancel</button>
+            <button type="button" id="link-apply" class="btn-primary">Apply</button>
+          </div>
+        </footer>
+      </div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
