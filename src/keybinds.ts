@@ -99,15 +99,26 @@ export function getActionOrder(): KeybindAction[] {
   return ACTION_ORDER
 }
 
+function isValidChord(value: unknown): value is KeybindChord {
+  return typeof value === 'string' && value.length > 0 && value.includes('+')
+}
+
 export function loadKeybinds(): KeybindMap {
+  const map = { ...DEFAULT_KEYBINDS }
   const raw = localStorage.getItem(STORAGE_KEY)
-  if (!raw) return { ...DEFAULT_KEYBINDS }
+  if (!raw) return map
   try {
-    const parsed = JSON.parse(raw) as Partial<KeybindMap>
-    return { ...DEFAULT_KEYBINDS, ...parsed }
+    const parsed = JSON.parse(raw) as Partial<Record<string, unknown>>
+    for (const action of ACTION_ORDER) {
+      const chord = parsed[action]
+      if (isValidChord(chord)) {
+        map[action] = chord.toLowerCase()
+      }
+    }
   } catch {
-    return { ...DEFAULT_KEYBINDS }
+    localStorage.removeItem(STORAGE_KEY)
   }
+  return map
 }
 
 export function saveKeybinds(map: KeybindMap): void {
@@ -130,12 +141,23 @@ function normalizeKey(key: string): string {
   return lower
 }
 
+/** Physical key for chords — Shift+8 becomes "8", not "*". */
+function keyTokenFromEvent(event: KeyboardEvent): string {
+  const { code } = event
+  if (code.startsWith('Digit')) return code.slice(5).toLowerCase()
+  if (code.startsWith('Key')) return code.slice(3).toLowerCase()
+  if (code === 'Slash') return '/'
+  if (code === 'Comma') return ','
+  if (code === 'Period') return '.'
+  return normalizeKey(event.key)
+}
+
 export function chordFromKeyboardEvent(event: KeyboardEvent): KeybindChord {
   const parts: string[] = []
   if (event.metaKey || event.ctrlKey) parts.push('mod')
   if (event.altKey) parts.push('alt')
   if (event.shiftKey) parts.push('shift')
-  parts.push(normalizeKey(event.key))
+  parts.push(keyTokenFromEvent(event))
   return parts.join('+')
 }
 

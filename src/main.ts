@@ -28,13 +28,8 @@ import {
   type HeadingLevel,
 } from './editor'
 import { closeHelp, initHelp, isCapturingKeybind, isHelpOpen, openHelp } from './help'
-import {
-  findActionForEvent,
-  isTypingTarget,
-  loadKeybinds,
-  type KeybindAction,
-  type KeybindMap,
-} from './keybinds'
+import { handleKeybindEvent } from './keybind-handler'
+import { loadKeybinds, type KeybindAction, type KeybindMap } from './keybinds'
 import { mountToolbarIcons, updateThemeIcon, updateToolbarTitles } from './toolbar-ui'
 import { initLinkDialog, isLinkDialogOpen, openLinkDialog } from './link-dialog'
 import { initMathDialog, isMathDialogOpen, openMathDialog } from './math-dialog'
@@ -65,8 +60,6 @@ let fileState: FileState = createInitialFileState()
 let lastSavedSnapshot = ''
 let draftTimer: ReturnType<typeof setTimeout> | null = null
 let keybinds: KeybindMap = loadKeybinds()
-
-const GLOBAL_ACTIONS: KeybindAction[] = ['save', 'open', 'help']
 
 const editor = createEditor(editorEl, () => {
   noteWritingActivity()
@@ -304,23 +297,25 @@ function executeAction(action: KeybindAction): void {
   syncToolbarActiveState(editor)
 }
 
+function shouldIgnoreKeybinds(): boolean {
+  return isCapturingKeybind() || isLinkDialogOpen() || isMathDialogOpen()
+}
+
 function bindKeybinds(): void {
-  document.addEventListener('keydown', (event) => {
-    if (isCapturingKeybind() || isLinkDialogOpen() || isMathDialogOpen()) return
-
-    const action = findActionForEvent(event, keybinds)
-    if (!action) return
-
-    const target = event.target
-    const inRestrictedField =
-      isTypingTarget(target) &&
-      !(target instanceof HTMLElement && target.isContentEditable)
-
-    if (inRestrictedField && !GLOBAL_ACTIONS.includes(action)) return
-
-    event.preventDefault()
-    executeAction(action)
-  })
+  // Capture phase runs before ProseMirror/TipTap consume the event.
+  document.addEventListener(
+    'keydown',
+    (event) => {
+      handleKeybindEvent(
+        event,
+        editor,
+        keybinds,
+        (action) => executeAction(action),
+        shouldIgnoreKeybinds,
+      )
+    },
+    true,
+  )
 }
 
 function bindToolbar(): void {
