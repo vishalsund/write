@@ -36,20 +36,34 @@ npm run preview
 
 This repo is configured for a **project site** at `/write/` (repo name `write`).
 
-### One-time GitHub settings
+### One-time GitHub setup (two steps — order matters)
 
-1. Open the repo on GitHub → **Settings** → **Pages**
-2. Under **Build and deployment**, set **Source** to **GitHub Actions** (not “Deploy from a branch”)
-3. Push to `main` — the workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml) builds Vite output and deploys `dist/`
+**Step 1 — Create the `gh-pages` branch (do this first)**
+
+You cannot select `gh-pages` in Pages settings until the branch exists. Leave Pages as-is for now (GitHub Actions or “Deploy from branch / main” is fine).
+
+1. Push `main` with the latest code (includes [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml))
+2. Open **Actions** → **Deploy to GitHub Pages** → **Run workflow** (or wait for the push to trigger it)
+3. When it finishes, confirm branch `gh-pages` exists: **Code** → branch dropdown → you should see `gh-pages`
+
+**Step 2 — Point Pages at that branch**
+
+1. **Settings** → **Pages**
+2. **Source:** Deploy from a branch
+3. **Branch:** `gh-pages` · **Folder:** `/ (root)` → **Save**
+4. Wait ~1 minute, then hard-refresh https://vishalsund.github.io/write/
 
 ### Why the unstyled page happened
 
-Default “deploy from branch” often publishes raw source files. The app needs a **built** `dist/` folder, and asset URLs must use the `/write/` base path (see [`vite.config.ts`](vite.config.ts)). Without that, CSS/JS load from `/assets/...` instead of `/write/assets/...` and the UI breaks.
+GitHub was serving **raw source** from `main` (`<script src="/src/main.ts">`), not the built app. The UI needs the Vite build in `dist/` with base path `/write/` (see [`vite.config.ts`](vite.config.ts)).
+
+If you previously used “Deploy from branch” with `main`, that causes this. The workflow now publishes only `dist/` to `gh-pages`.
 
 ### After you push
 
-- Wait for the **Deploy to GitHub Pages** workflow to finish (Actions tab)
-- Visit https://vishalsund.github.io/write/
+- Wait for **Deploy to GitHub Pages** to finish (Actions tab)
+- Hard-refresh https://vishalsund.github.io/write/ (Cmd+Shift+R)
+- In the page source you should see `/write/assets/...js`, not `/src/main.ts`
 
 ### Custom domain (optional)
 
