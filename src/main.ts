@@ -45,6 +45,7 @@ import {
   initEditorFont,
   type FontFamily,
 } from './settings'
+import { initBrandActivity, noteWritingActivity } from './brand'
 import { initTheme, toggleTheme } from './theme'
 
 const DRAFT_KEY = 'write:draft'
@@ -68,6 +69,7 @@ let keybinds: KeybindMap = loadKeybinds()
 const GLOBAL_ACTIONS: KeybindAction[] = ['save', 'open', 'help']
 
 const editor = createEditor(editorEl, () => {
+  noteWritingActivity()
   refreshCounts()
   syncHeadingSelect(editor, headingSelect)
   syncToolbarActiveState(editor)
@@ -422,6 +424,7 @@ function bindUi(): void {
 }
 
 initTheme()
+initBrandActivity()
 initEditorFont()
 initHelp({
   onClose: () => editor.commands.focus(),

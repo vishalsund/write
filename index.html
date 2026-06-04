@@ -9,10 +9,7 @@
   <body>
     <div id="app" class="app">
       <header class="top-bar">
-        <div class="top-bar-start">
-          <a href="./" class="brand" aria-label="write">
-            <span class="brand-mark">write<span class="brand-underscore">_</span></span>
-          </a>
+        <div class="top-bar-left">
           <input
             type="text"
             id="doc-title"
@@ -22,6 +19,9 @@
             aria-label="Document name"
           />
         </div>
+        <a href="./" id="brand" class="brand" aria-label="write">
+          <span class="brand-mark">write<span id="brand-cursor" class="brand-cursor">.</span></span>
+        </a>
         <div class="top-actions">
           <button type="button" id="btn-open" class="btn-ghost">Open</button>
           <button type="button" id="btn-save" class="btn-ghost">Save</button>
