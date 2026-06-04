@@ -81,6 +81,16 @@
             <button type="button" data-cmd="italic" class="btn-tool" data-label="Italic" title="Italic">
               <span class="btn-tool-letter italic">I</span>
             </button>
+            <div class="select-wrap select-wrap--compact select-wrap--text-font">
+              <label class="select-label" for="text-font">Run font</label>
+              <select id="text-font" class="toolbar-select compact" aria-label="Font for selected text">
+                <option value="">Default</option>
+                <option value="sans">Sans</option>
+                <option value="serif">Serif</option>
+                <option value="mono">Mono</option>
+                <option value="cursive">Cursive</option>
+              </select>
+            </div>
             <button type="button" data-cmd="link" class="btn-tool" data-label="Link" title="Link">
               <span class="icon-slot" data-icon="link"></span>
             </button>
@@ -146,6 +156,10 @@
               <option value="mono">Mono</option>
             </select>
           </div>
+          <label class="code-cursive-toggle" title="Cascadia cursive on keywords in code">
+            <input type="checkbox" id="code-cursive-keywords" checked />
+            <span>Cursive code</span>
+          </label>
           <div class="select-wrap select-wrap--compact">
             <label class="select-label" for="font-size">Size</label>
             <select id="font-size" class="toolbar-select compact" aria-label="Font size">

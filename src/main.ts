@@ -1,4 +1,6 @@
 import 'katex/dist/katex.min.css'
+import '@fontsource/cascadia-code/latin-400.css'
+import '@fontsource/cascadia-code/latin-400-italic.css'
 import './style.css'
 import { countText, formatCounts } from './counts'
 import {
@@ -33,11 +35,14 @@ import { loadKeybinds, type KeybindAction, type KeybindMap } from './keybinds'
 import { mountToolbarIcons, updateThemeIcon, updateToolbarTitles } from './toolbar-ui'
 import { initLinkDialog, isLinkDialogOpen, openLinkDialog } from './link-dialog'
 import { initMathDialog, isMathDialogOpen, openMathDialog } from './math-dialog'
+import type { TextFontRole } from './fonts'
 import {
   applyEditorFont,
+  getCodeCursiveKeywordsEnabled,
   getStoredFontFamily,
   getStoredFontSize,
   initEditorFont,
+  setCodeCursiveKeywordsEnabled,
   type FontFamily,
 } from './settings'
 import { initBrandActivity, noteWritingActivity } from './brand'
@@ -54,6 +59,8 @@ const documentCountEl = document.getElementById('document-count')!
 const exportMenu = document.getElementById('export-menu')!
 const fontFamilySelect = document.getElementById('font-family') as HTMLSelectElement
 const fontSizeSelect = document.getElementById('font-size') as HTMLSelectElement
+const textFontSelect = document.getElementById('text-font') as HTMLSelectElement
+const codeCursiveToggle = document.getElementById('code-cursive-keywords') as HTMLInputElement
 const headingSelect = document.getElementById('heading-select') as HTMLSelectElement
 
 let fileState: FileState = createInitialFileState()
@@ -61,14 +68,20 @@ let lastSavedSnapshot = ''
 let draftTimer: ReturnType<typeof setTimeout> | null = null
 let keybinds: KeybindMap = loadKeybinds()
 
-const editor = createEditor(editorEl, () => {
-  noteWritingActivity()
-  refreshCounts()
-  syncHeadingSelect(editor, headingSelect)
-  syncToolbarActiveState(editor)
-  markDirty()
-  scheduleDraftSave()
-})
+const editor = createEditor(
+  editorEl,
+  () => {
+    noteWritingActivity()
+    refreshCounts()
+    syncHeadingSelect(editor, headingSelect)
+    syncToolbarActiveState(editor)
+    markDirty()
+    scheduleDraftSave()
+  },
+  () => {
+    syncTextFontSelect()
+  },
+)
 
 function getTitle(): string {
   return docTitle.value.trim() || 'Untitled'
@@ -242,6 +255,43 @@ function exportAs(kind: FileKind): void {
 function syncFontControls(): void {
   fontFamilySelect.value = getStoredFontFamily()
   fontSizeSelect.value = String(getStoredFontSize())
+  codeCursiveToggle.checked = getCodeCursiveKeywordsEnabled()
+}
+
+function syncTextFontSelect(): void {
+  const { from, to } = editor.state.selection
+  if (from === to) {
+    textFontSelect.value = ''
+    return
+  }
+  const roles = new Set<TextFontRole>()
+  editor.state.doc.nodesBetween(from, to, (node) => {
+    if (!node.isText) return
+    const mark = node.marks.find((m) => m.type.name === 'textFont')
+    if (mark?.attrs.font) roles.add(mark.attrs.font as TextFontRole)
+  })
+  if (roles.size === 1) {
+    textFontSelect.value = [...roles][0]
+  } else {
+    textFontSelect.value = ''
+  }
+}
+
+function applyTextFontFromSelect(): void {
+  if (editor.isActive('codeBlock')) {
+    textFontSelect.value = ''
+    return
+  }
+  const value = textFontSelect.value
+  if (!value) {
+    editor.chain().focus().unsetTextFont().run()
+    return
+  }
+  editor.chain().focus().setTextFont(value as TextFontRole).run()
+}
+
+function refreshCodeCursiveDecorations(): void {
+  editor.view.dispatch(editor.state.tr.setMeta('codeCursiveKeywords', true))
 }
 
 function refreshToolbarTitles(): void {
@@ -396,6 +446,15 @@ function bindUi(): void {
     applyEditorFont(fontFamilySelect.value as FontFamily, Number(fontSizeSelect.value))
   })
 
+  codeCursiveToggle.addEventListener('change', () => {
+    setCodeCursiveKeywordsEnabled(codeCursiveToggle.checked)
+    refreshCodeCursiveDecorations()
+  })
+
+  textFontSelect.addEventListener('change', () => {
+    applyTextFontFromSelect()
+  })
+
   const editorWrap = document.querySelector('.editor-wrap')!
   editorWrap.addEventListener('dragover', (event) => {
     const drag = event as DragEvent
@@ -440,4 +499,5 @@ restoreDraft()
 refreshCounts()
 syncHeadingSelect(editor, headingSelect)
 syncToolbarActiveState(editor)
+syncTextFontSelect()
 editor.commands.focus()

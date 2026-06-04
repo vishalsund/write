@@ -14,6 +14,7 @@
     "vite": "^8.0.12"
   },
   "dependencies": {
+    "@fontsource/cascadia-code": "^5.2.3",
     "@tiptap/core": "^3.25.0",
     "@tiptap/extension-image": "^3.25.0",
     "@tiptap/extension-link": "^3.25.0",

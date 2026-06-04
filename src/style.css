@@ -19,6 +19,8 @@
   --radius-sm: 7px;
   --editor-font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --editor-font-size: 17px;
+  --font-code: "Cascadia Code", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --font-cursive: "Cascadia Code", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   --editor-line-height: 1.7;
   --editor-max-width: 680px;
 }
@@ -371,9 +373,30 @@ body {
   display: block;
 }
 
+/* Cascadia cursive (italic + ss01) */
+.code-token-cursive,
+.text-font--cursive {
+  font-family: var(--font-cursive);
+  font-style: italic;
+  font-feature-settings: 'ss01' 1, 'calt' 1;
+  font-variant-ligatures: contextual;
+}
+
+.text-font--sans {
+  font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.text-font--serif {
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+}
+
+.text-font--mono {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
 /* Inline code */
 .prose-editor code.editor-inline-code {
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-family: var(--font-code);
   font-size: 0.88em;
   background: var(--code-bg);
   color: var(--code-text);
@@ -390,7 +413,7 @@ body {
   padding: 0.85rem 1rem;
   margin: 0.85em 0;
   overflow-x: auto;
-  font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  font-family: var(--font-code);
   font-size: 0.84em;
   line-height: 1.55;
   tab-size: 2;
@@ -401,6 +424,7 @@ body {
   padding: 0;
   font-size: inherit;
   color: inherit;
+  font-family: inherit;
 }
 
 /* Math (KaTeX in editor) */
@@ -574,6 +598,26 @@ body {
 
 .font-settings .select-wrap {
   height: 30px;
+}
+
+.code-cursive-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+}
+
+.code-cursive-toggle input {
+  accent-color: var(--accent);
+}
+
+.select-wrap--text-font {
+  min-width: 5.5rem;
 }
 
 /* Toolbar icons */

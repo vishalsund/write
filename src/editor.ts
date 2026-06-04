@@ -6,6 +6,9 @@ import Placeholder from '@tiptap/extension-placeholder'
 import StarterKit from '@tiptap/starter-kit'
 import { Markdown } from '@tiptap/markdown'
 import { handleMathNodeClick } from './math-bridge'
+import { CodeCursiveKeywords } from './extension-code-cursive'
+import { TextFont } from './extension-text-font'
+import { getCodeCursiveKeywordsEnabled } from './settings'
 
 export type EditorCommand =
   | 'bold'
@@ -92,6 +95,7 @@ const katexOptions = {
 export function createEditor(
   element: HTMLElement,
   onUpdate: () => void,
+  onSelectionUpdate?: () => void,
 ): Editor {
   const editor = new Editor({
     element,
@@ -139,6 +143,10 @@ export function createEditor(
       Placeholder.configure({
         placeholder: 'Start writing…',
       }),
+      TextFont,
+      CodeCursiveKeywords.configure({
+        enabled: () => getCodeCursiveKeywordsEnabled(),
+      }),
       Markdown,
     ],
     content: '',
@@ -158,7 +166,7 @@ export function createEditor(
       },
     },
     onUpdate,
-    onSelectionUpdate: onUpdate,
+    onSelectionUpdate: onSelectionUpdate ?? onUpdate,
   })
 
   return editor
