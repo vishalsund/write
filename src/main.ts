@@ -148,6 +148,27 @@ function restoreDraft(): void {
   }
 }
 
+function confirmDiscardUnsaved(): boolean {
+  if (!fileState.dirty) return true
+  return window.confirm(
+    'Your work has not been saved yet. Discard it and start a new document?',
+  )
+}
+
+function startNewDocument(): void {
+  if (!confirmDiscardUnsaved()) return
+
+  editor.commands.setContent('', { contentType: 'markdown' })
+  fileState = createInitialFileState()
+  docTitle.value = 'Untitled'
+  localStorage.removeItem(DRAFT_KEY)
+  markClean()
+  syncHeadingSelect(editor, headingSelect)
+  syncToolbarActiveState(editor)
+  refreshCounts()
+  editor.commands.focus()
+}
+
 function applyLoadedFile(name: string, kind: FileKind, handle: FileSystemFileHandle | null): void {
   fileState = {
     name: stripExtension(name),
@@ -402,6 +423,7 @@ function bindToolbar(): void {
 }
 
 function bindUi(): void {
+  document.getElementById('btn-new')!.addEventListener('click', () => startNewDocument())
   document.getElementById('btn-open')!.addEventListener('click', () => void openViaPicker())
   document.getElementById('btn-save')!.addEventListener('click', () => void saveDocument())
   document.getElementById('btn-help')!.addEventListener('click', () => openHelp())
